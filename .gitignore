@@ -1,0 +1,30 @@
+# ===== Build output =====
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# ===== IDE =====
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== Logs =====
+*.log
+logs/
+
+# ===== Local secrets / environment =====
+.env
+.env.local
+*.env
+
+# ===== Spring Boot dev tooling =====
+HELP.md

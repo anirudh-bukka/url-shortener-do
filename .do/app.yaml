@@ -1,0 +1,46 @@
+# DigitalOcean App Platform spec. Deploy with:
+#   doctl apps create --spec .do/app.yaml
+# (or paste it in the App Platform UI). App Platform builds the Dockerfile,
+# injects the managed-database connection string, and runs health checks.
+name: url-shortener
+region: nyc
+
+services:
+  - name: api
+    dockerfile_path: Dockerfile
+    source_dir: /
+    github:
+      # Point this at your repository; deploy_on_push gives you CD on every merge.
+      repo: your-org/url-shortener
+      branch: main
+      deploy_on_push: true
+
+    http_port: 8080
+    instance_count: 2          # >1 instance proves the design is horizontally scalable
+    instance_size_slug: basic-xxs
+
+    health_check:
+      http_path: /actuator/health/readiness
+      initial_delay_seconds: 40
+      period_seconds: 15
+
+    envs:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: APP_BASE_URL
+        value: ${APP_URL}        # App Platform-provided public URL
+      # Build the JDBC URL from the managed Postgres component's bindable vars.
+      # sslmode=require is mandatory for DigitalOcean managed databases.
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://${db.HOSTNAME}:${db.PORT}/${db.DATABASE}?sslmode=require
+      - key: SPRING_DATASOURCE_USERNAME
+        value: ${db.USERNAME}
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: ${db.PASSWORD}
+        type: SECRET
+
+databases:
+  - name: db
+    engine: PG
+    version: "16"
+    production: true
