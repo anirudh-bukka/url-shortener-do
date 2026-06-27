@@ -1,0 +1,16 @@
+# Test profile. Datasource properties are injected at runtime by
+# AbstractIntegrationTest via Testcontainers, so only non-DB settings live here.
+app:
+  base-url: http://localhost:8080
+  reserved-paths: api,actuator,swagger-ui,v3
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    com.example.urlshortener: DEBUG
