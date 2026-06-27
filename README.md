@@ -125,18 +125,6 @@ url-shortener/
 
 ## Running locally
 
-### Option A — Docker (recommended)
-
-```bash
-cp .env.example .env
-docker compose up --build
-```
-
-### Option B — Maven wrapper, zero dependencies (in-memory H2)
-
-No Docker, PostgreSQL or Redis required. The `local` Maven profile runs the app against
-an in-memory H2 database (PostgreSQL-compatibility mode) and the in-process cache:
-
 ```bash
 ./mvnw -Plocal spring-boot:run
 ```
@@ -145,15 +133,6 @@ This is ideal inside containers/dev environments where you can't run Docker. Dat
 kept only for the lifetime of the process; browse it at http://localhost:8080/h2-console
 (JDBC URL `jdbc:h2:mem:urlshortener`, user `sa`, empty password). H2 is scoped to this
 profile only, so the default build and the production Docker image stay PostgreSQL-only.
-
-### Option C — Maven wrapper against a real Postgres
-
-```bash
-export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/urlshortener
-export SPRING_DATASOURCE_USERNAME=urlshortener
-export SPRING_DATASOURCE_PASSWORD=urlshortener
-./mvnw spring-boot:run
-```
 
 Then open:
 - Swagger UI: http://localhost:8080/swagger-ui.html
