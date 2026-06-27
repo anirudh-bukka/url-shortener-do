@@ -1,0 +1,18 @@
+# Local development overrides. Activated with SPRING_PROFILES_ACTIVE=dev (default).
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+logging:
+  level:
+    com.example.urlshortener: DEBUG
+    org.hibernate.SQL: DEBUG
+
+# Full health details are convenient locally.
+management:
+  endpoint:
+    health:
+      show-details: always

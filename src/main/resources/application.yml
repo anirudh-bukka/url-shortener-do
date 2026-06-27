@@ -1,0 +1,70 @@
+# ============================================================================
+# Base configuration shared by all profiles. Profile-specific overrides live in
+# application-dev.yml and application-prod.yml. Values use ${ENV:default} so the
+# same artifact runs anywhere by changing environment variables only.
+# ============================================================================
+spring:
+  application:
+    name: url-shortener
+
+  # Default active profile; override with SPRING_PROFILES_ACTIVE=prod in production.
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/urlshortener}
+    username: ${SPRING_DATASOURCE_USERNAME:urlshortener}
+    password: ${SPRING_DATASOURCE_PASSWORD:urlshortener}
+    hikari:
+      pool-name: url-shortener-pool
+      maximum-pool-size: ${DB_POOL_MAX:10}
+      minimum-idle: ${DB_POOL_MIN:2}
+
+  jpa:
+    hibernate:
+      # Flyway owns the schema; Hibernate must never auto-alter it.
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  # Redis is optional. When the host is blank the CacheConfig in-memory fallback is used.
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+
+server:
+  port: ${PORT:8080}
+  # Honour X-Forwarded-* headers from DigitalOcean's load balancer / App Platform.
+  forward-headers-strategy: framework
+
+# Custom application settings (bound to AppProperties).
+app:
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+  reserved-paths: api,actuator,swagger-ui,v3,favicon.ico
+
+# Operational endpoints for health checks and metrics.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true   # exposes /actuator/health/liveness and /readiness
+      show-details: when_authorized
+  health:
+    redis:
+      enabled: false    # don't fail health when Redis is intentionally absent
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

@@ -1,0 +1,50 @@
+# Local profile: run the whole app with NO external services (no Docker / Postgres /
+# Redis). Backed by an in-memory H2 database in PostgreSQL-compatibility mode plus the
+# in-process cache fallback. Activate via the Maven 'local' profile:
+#
+#     ./mvnw -Plocal spring-boot:run
+#
+# Data lives only for the lifetime of the process - perfect for trying the API locally.
+spring:
+  # No Redis in local dev: turn off its auto-configuration entirely so the app uses the
+  # in-process ConcurrentMapCacheManager fallback (see CacheConfig) instead of trying to
+  # open a Lettuce connection to a non-existent host.
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+  datasource:
+    # DATABASE_TO_LOWER mirrors Postgres' unquoted-identifier folding so the native
+    # `nextval('url_mapping_seq')` lookup resolves; DB_CLOSE_DELAY keeps the in-memory
+    # DB alive between connections.
+    url: jdbc:h2:mem:urlshortener;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      # The Flyway migration is PostgreSQL-specific, so for this throwaway H2 database
+      # we let Hibernate build the table from the @Entity instead.
+      ddl-auto: create-drop
+    show-sql: true
+
+  # Flyway is disabled here; the sequence it would normally create is provided by
+  # schema-h2.sql below (Hibernate does not manage the manually-assigned id sequence).
+  flyway:
+    enabled: false
+
+  sql:
+    init:
+      mode: always
+      platform: h2   # loads schema-h2.sql
+
+  # Browse the in-memory data at http://localhost:8080/h2-console
+  h2:
+    console:
+      enabled: true
+
+logging:
+  level:
+    com.example.urlshortener: DEBUG

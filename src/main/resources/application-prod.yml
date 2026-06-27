@@ -1,0 +1,21 @@
+# Production overrides. Activated with SPRING_PROFILES_ACTIVE=prod.
+# All sensitive values come from environment variables / DigitalOcean secrets.
+spring:
+  jpa:
+    show-sql: false
+  datasource:
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:20}
+
+logging:
+  level:
+    root: INFO
+    com.example.urlshortener: INFO
+  pattern:
+    # JSON-ish single-line logs are friendlier for DO's log aggregation.
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level [%thread] %logger{36} - %msg%n"
+
+management:
+  endpoint:
+    health:
+      show-details: never
